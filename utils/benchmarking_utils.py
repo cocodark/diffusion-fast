@@ -32,7 +32,7 @@ BENCHMARK_FIELDS = [
 def create_parser(is_pixart=False):
     """Creates CLI args parser."""
     parser = argparse.ArgumentParser()
-
+#mnt/bn/wzx-nas-hl/stable-diffusion-v1-5
     parser.add_argument("--ckpt", type=str, default="stabilityai/stable-diffusion-xl-base-1.0")
     parser.add_argument("--prompt", type=str, default="ghibli style, a fantasy landscape with castles")
     parser.add_argument("--no_bf16", action="store_true")
@@ -50,7 +50,7 @@ def create_parser(is_pixart=False):
         parser.add_argument("--compile_unet", action="store_true")
 
     parser.add_argument("--compile_vae", action="store_true")
-    parser.add_argument("--compile_mode", type=str, default=None, choices=["reduce-overhead", "max-autotune"])
+    parser.add_argument("--compile_mode", type=str, default=None, choices=["default","reduce-overhead", "max-autotune","max-autotune-no-cudagraphs"])
     parser.add_argument("--change_comp_config", action="store_true")
     parser.add_argument("--do_quant", type=str, default=None)
     parser.add_argument("--tag", type=str, default="")

@@ -141,6 +141,7 @@ def load_pipeline(
             elif do_quant == "int8weightonly":
                 change_linear_weights_to_int8_woqtensors(pipe.vae)
             elif do_quant == "int8dynamic":
+                # Unsupported conversion from i8 to i32 for sd 1.5
                 apply_dynamic_quant(pipe.vae, dynamic_quant_filter_fn)
             else:
                 raise ValueError(f"Unknown do_quant value: {do_quant}.")
