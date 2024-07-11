@@ -4,7 +4,7 @@ import torch
 torch.set_float32_matmul_precision("high")
 
 import sys  # noqa: E402
-
+import torch_tensorrt
 
 sys.path.append(".")
 from utils.benchmarking_utils import (  # noqa: E402
@@ -29,8 +29,9 @@ def main(args) -> dict:
         ckpt=args.ckpt,
         compile_unet=args.compile_unet,
         compile_vae=args.compile_vae,
+        compile_backend=args.compile_backend,
         no_sdpa=args.no_sdpa,
-        no_bf16=args.no_bf16,
+        d_type=args.d_type,
         upcast_vae=args.upcast_vae,
         enable_fused_projections=args.enable_fused_projections,
         do_quant=args.do_quant,
@@ -64,12 +65,13 @@ if __name__ == "__main__":
     parser = create_parser()
     args = parser.parse_args()
     print(args)
+    print('compiler',torch.compiler.list_backends())
 
     data_dict, img = main(args)
 
     name = (
         args.ckpt.replace("/", "_")
-        + f"bf16@{not args.no_bf16}-sdpa@{not args.no_sdpa}-bs@{args.batch_size}-fuse@{args.enable_fused_projections}-upcast_vae@{args.upcast_vae}-steps@{args.num_inference_steps}-unet@{args.compile_unet}-vae@{args.compile_vae}-mode@{args.compile_mode}-change_comp_config@{args.change_comp_config}-do_quant@{args.do_quant}-tag@{args.tag}-device@{args.device}.csv"
+        + f"dtype@{args.d_type}-sdpa@{not args.no_sdpa}-bs@{args.batch_size}-fuse@{args.enable_fused_projections}-upcast_vae@{args.upcast_vae}-steps@{args.num_inference_steps}-unet@{args.compile_unet}-vae@{args.compile_vae}-mode@{args.compile_mode}-backend@{args.compile_backend}-change_comp_config@{args.change_comp_config}-do_quant@{args.do_quant}-tag@{args.tag}-device@{args.device}.csv"
     )
     img.save(f'{name.replace(".csv", "")}.jpeg')
     write_to_csv(name, data_dict)

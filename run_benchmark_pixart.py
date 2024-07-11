@@ -30,7 +30,7 @@ def main(args) -> dict:
         compile_transformer=args.compile_transformer,
         compile_vae=args.compile_vae,
         no_sdpa=args.no_sdpa,
-        no_bf16=args.no_bf16,
+        dtype=args.d_type,
         enable_fused_projections=args.enable_fused_projections,
         do_quant=args.do_quant,
         compile_mode=args.compile_mode,
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     name = (
         args.ckpt.replace("/", "_")
-        + f"bf16@{not args.no_bf16}-sdpa@{not args.no_sdpa}-bs@{args.batch_size}-fuse@{args.enable_fused_projections}-upcast_vae@NA-steps@{args.num_inference_steps}-transformer@{args.compile_transformer}-vae@{args.compile_vae}-mode@{args.compile_mode}-change_comp_config@{args.change_comp_config}-do_quant@{args.do_quant}-tag@{args.tag}-device@{args.device}.csv"
+        + f"dtype@{not args.d_type}-sdpa@{not args.no_sdpa}-bs@{args.batch_size}-fuse@{args.enable_fused_projections}-upcast_vae@NA-steps@{args.num_inference_steps}-transformer@{args.compile_transformer}-vae@{args.compile_vae}-mode@{args.compile_mode}-change_comp_config@{args.change_comp_config}-do_quant@{args.do_quant}-tag@{args.tag}-device@{args.device}.csv"
     )
     img.save(f"{name}.jpeg")
     write_to_csv(name, data_dict, is_pixart=True)

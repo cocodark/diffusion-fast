@@ -11,7 +11,7 @@ import torch.utils.benchmark as benchmark
 BENCHMARK_FIELDS = [
     "pipeline_cls",
     "ckpt_id",
-    "bf16",
+    "dtype",
     "sdpa",
     "fused_qkv_projections",
     "upcast_vae",
@@ -20,6 +20,7 @@ BENCHMARK_FIELDS = [
     "compile_unet",
     "compile_vae",
     "compile_mode",
+    "compile_backend",
     "change_comp_config",
     "do_quant",
     "time (secs)",
@@ -35,7 +36,7 @@ def create_parser(is_pixart=False):
 #mnt/bn/wzx-nas-hl/stable-diffusion-v1-5
     parser.add_argument("--ckpt", type=str, default="stabilityai/stable-diffusion-xl-base-1.0")
     parser.add_argument("--prompt", type=str, default="ghibli style, a fantasy landscape with castles")
-    parser.add_argument("--no_bf16", action="store_true")
+    parser.add_argument("--d_type", type = str,default="f16",choices=["f16", "bf16", "f32"])
     parser.add_argument("--no_sdpa", action="store_true")
     parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--num_inference_steps", type=int, default=30)
@@ -50,7 +51,8 @@ def create_parser(is_pixart=False):
         parser.add_argument("--compile_unet", action="store_true")
 
     parser.add_argument("--compile_vae", action="store_true")
-    parser.add_argument("--compile_mode", type=str, default=None, choices=["default","reduce-overhead", "max-autotune","max-autotune-no-cudagraphs"])
+    parser.add_argument("--compile_mode", type=str, default="default", choices=["default","reduce-overhead", "max-autotune","max-autotune-no-cudagraphs"])
+    parser.add_argument("--compile_backend", type=str, default="inductor", choices=torch.compiler.list_backends())
     parser.add_argument("--change_comp_config", action="store_true")
     parser.add_argument("--do_quant", type=str, default=None)
     parser.add_argument("--tag", type=str, default="")
@@ -84,7 +86,7 @@ def generate_csv_dict(pipeline_cls: str, args, time: float) -> Dict[str, Union[s
     data_dict = {
         "pipeline_cls": pipeline_cls,
         "ckpt_id": args.ckpt,
-        "bf16": not args.no_bf16,
+        "dtype":  args.d_type,
         "sdpa": not args.no_sdpa,
         "fused_qkv_projections": args.enable_fused_projections,
         "upcast_vae": "NA" if "PixArt" in pipeline_cls else args.upcast_vae,
@@ -93,6 +95,7 @@ def generate_csv_dict(pipeline_cls: str, args, time: float) -> Dict[str, Union[s
         "compile_unet": args.compile_transformer if "PixArt" in pipeline_cls else args.compile_unet,
         "compile_vae": args.compile_vae,
         "compile_mode": args.compile_mode,
+        "compile_backend": args.compile_backend,
         "change_comp_config": args.change_comp_config,
         "do_quant": args.do_quant,
         "time (secs)": time,

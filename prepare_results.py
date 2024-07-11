@@ -37,7 +37,7 @@ def prepare_plot(df, args):
         lambda row: ", ".join([f"{col}-{row[col]}" for col in df_filtered.columns if col != "time (secs)"]), axis=1
     )
     df_filtered["formatted_settings"] = df_filtered["settings"].str.replace(", ", "\n", regex=False)
-    df_filtered.loc[0, "formatted_settings"] = "default"
+    # df_filtered.loc[0, "formatted_settings"] = "default"
 
     # Generating the plot with matplotlib directly for better control
     plt.figure(figsize=(12, 10))

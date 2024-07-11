@@ -51,8 +51,9 @@ def load_pipeline(
     ckpt: str,
     compile_unet: bool,
     compile_vae: bool,
+    compile_backend:str,
     no_sdpa: bool,
-    no_bf16: bool,
+    d_type: str,
     upcast_vae: bool,
     enable_fused_projections: bool,
     do_quant: bool,
@@ -66,8 +67,14 @@ def load_pipeline(
         raise ValueError("Compilation for UNet must be enabled when quantizing.")
     if do_quant and not compile_vae:
         raise ValueError("Compilation for VAE must be enabled when quantizing.")
-
-    dtype = torch.float32 if no_bf16 else torch.bfloat16
+    if d_type == "f16":
+        dtype = torch.float16
+    elif d_type == "bf16":
+        dtype = torch.bfloat16
+    elif d_type == "f32":
+        dtype = torch.float32
+    else:
+        raise ValueError(f"Unknown d_type: {d_type}.")
     print(f"Using dtype: {dtype}")
 
     if ckpt != "runwayml/stable-diffusion-v1-5":
@@ -121,7 +128,7 @@ def load_pipeline(
             torch._inductor.config.force_fuse_int_mm_with_mul = True
             torch._inductor.config.use_mixed_mm = True
 
-        pipe.unet = torch.compile(pipe.unet, mode=compile_mode, fullgraph=True)
+        pipe.unet = torch.compile(pipe.unet, mode=compile_mode,backend=compile_backend,fullgraph=True)
 
     if compile_vae:
         pipe.vae.to(memory_format=torch.channels_last)
@@ -148,7 +155,7 @@ def load_pipeline(
             torch._inductor.config.force_fuse_int_mm_with_mul = True
             torch._inductor.config.use_mixed_mm = True
 
-        pipe.vae.decode = torch.compile(pipe.vae.decode, mode=compile_mode, fullgraph=True)
+        pipe.vae.decode = torch.compile(pipe.vae.decode, mode=compile_mode,backend=compile_backend,fullgraph=True)
 
     pipe.set_progress_bar_config(disable=True)
     return pipe
